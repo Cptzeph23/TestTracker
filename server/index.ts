@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import { serveStatic } from './static';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,9 @@ app.use(cors({
 // Routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/auth', authRoutes);
+
+// Serve built client in production
+serveStatic(app);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
