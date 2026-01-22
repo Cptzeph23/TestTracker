@@ -10,6 +10,9 @@ const router = Router();
 // Get all tasks (with optional filtering)
 router.get('/', authenticateToken, async (req, res) => {
   try {
+    if (process.env.DEMO_AUTH === 'true') {
+      return res.json([]);
+    }
     const { status, assignedTo } = req.query;
     
     let query = db.select().from(tasks);
