@@ -1,5 +1,6 @@
 // client/src/lib/api.ts
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api';
 
 type ApiResponse<T = any> = {
   data?: T;
@@ -35,6 +36,15 @@ const handleResponse = async <T = any>(response: Response): Promise<T> => {
 };
 
 export const api = {
+  async login(username: string, password: string) {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: createHeaders(),
+      credentials: 'include' as RequestCredentials,
+      body: JSON.stringify({ username, password }),
+    });
+    return handleResponse(response);
+  },
   // Set the authentication token
   setAuthToken(token: string) {
     localStorage.setItem('token', token);

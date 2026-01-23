@@ -181,38 +181,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      console.log('Attempting login with username:', username);
-      const response = await fetch('http://localhost:5001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ username, password }),
-      });
-
-      console.log('Login response status:', response.status);
-      const data = await response.json().catch(e => {
-        console.error('Failed to parse login response:', e);
-        return { error: 'Invalid response from server' };
-      });
+      const data = await api.login(username, password);
       
       console.log('Login response data:', data);
 
-      if (response.ok) {
-        if (data.user) {
+      if (data && (data as any).user) {
           const userData = {
-            id: data.user.id,
-            username: data.user.username,
-            name: data.user.name || username,
-            role: data.user.role || 'employee',
-            avatar: data.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
+            id: (data as any).user.id,
+            username: (data as any).user.username,
+            name: (data as any).user.name || username,
+            role: (data as any).user.role || 'employee',
+            avatar: (data as any).user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
           };
           
           console.log('User data to store:', userData);
           
           // The server sends token directly in the response
-          const authToken = data.token;
+          const authToken = (data as any).token;
           console.log('Auth token found:', authToken ? 'Yes' : 'No');
           
           if (authToken) {
@@ -244,11 +229,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             title: "Login Successful",
             description: `Welcome back, ${userData.name}!`,
           });
-        } else {
-          throw new Error('User data not found in response');
-        }
       } else {
-        throw new Error(data.error || 'Login failed');
+        throw new Error('User data not found in response');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
@@ -355,32 +337,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     console.log('Sending task to server:', taskToSend);
     
     // Send the task to the API
-    const response = await fetch('http://localhost:5001/api/tasks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      credentials: 'include',
-      body: JSON.stringify(taskToSend)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { message: errorText };
-      }
-      
-      console.error('Task creation failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData
-      });
-      
-      if (response.status === 401) {
+    let newTask;
+    try {
+      newTask = await api.createTask(taskToSend);
+    } catch (err: any) {
+      if (err?.status === 401) {
         // Token is invalid or expired
         localStorage.removeItem('token'); // Clear invalid token
         toast({
@@ -393,11 +354,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         // Optionally redirect to login
         // window.location.href = '/login';
       }
-      
-      throw new Error(errorData.error || `Failed to create task (${response.status} ${response.statusText})`);
+      throw err;
     }
     
-    const newTask = await response.json();
     console.log('Task created successfully:', newTask);
     
     // Update local state with the new task
