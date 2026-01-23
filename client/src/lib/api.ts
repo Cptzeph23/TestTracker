@@ -1,5 +1,5 @@
 // client/src/lib/api.ts
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 type ApiResponse<T = any> = {
   data?: T;

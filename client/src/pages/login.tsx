@@ -10,7 +10,6 @@ import logo from "@assets/18152e2c-9e0b-4100-8385-8fcf64ca11b7_1764764393554.png
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const { login, user } = useStore();
   const [, setLocation] = useLocation();
 
@@ -21,7 +20,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login(username, password);
+    login(username);
   };
 
   return (
@@ -64,16 +63,6 @@ export default function LoginPage() {
                     placeholder="Agent ID / Username" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 h-12 bg-zinc-900/50 border-amber-500/20 text-white placeholder:text-zinc-600 focus-visible:ring-amber-500/50 focus-visible:border-amber-500 transition-all"
-                  />
-                </div>
-                <div className="relative group">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-amber-500/50 group-focus-within:text-amber-500 transition-colors" />
-                  <Input 
-                    type="password" 
-                    placeholder="Password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 h-12 bg-zinc-900/50 border-amber-500/20 text-white placeholder:text-zinc-600 focus-visible:ring-amber-500/50 focus-visible:border-amber-500 transition-all"
                   />
                 </div>

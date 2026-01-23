@@ -182,7 +182,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       console.log('Attempting login with username:', username);
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('http://localhost:5001/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -355,7 +355,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     console.log('Sending task to server:', taskToSend);
     
     // Send the task to the API
-    const response = await fetch('/api/tasks', {
+    const response = await fetch('http://localhost:5001/api/tasks', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

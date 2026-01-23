@@ -37,11 +37,20 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
 
   try {
     // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { id: string };
     
+    if (process.env.DEMO_AUTH === 'true') {
+      req.user = {
+        id: decoded.id,
+        username: 'demo',
+        role: 'admin',
+      };
+      return next();
+    }
+
     // Fetch the user from the database
     const user = await db.query.users.findFirst({
-      where: eq(users.id, decoded.userId),
+      where: eq(users.id, decoded.id),
     });
 
     if (!user) {

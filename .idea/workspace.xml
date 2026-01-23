@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c9670822-2142-47a5-b35e-5cb32be1881a" name="Changes" comment="" />
+    <list default="true" id="c9670822-2142-47a5-b35e-5cb32be1881a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/client/src/lib/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/lib/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/lib/store.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/lib/store.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/pages/login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/login.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/routes/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/routes/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/seed.ts" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

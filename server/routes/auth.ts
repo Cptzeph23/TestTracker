@@ -13,6 +13,22 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    if (process.env.DEMO_AUTH === 'true') {
+      const demoUser = {
+        id: '00000000-0000-0000-0000-000000000001',
+        username,
+        role: 'admin',
+        name: username,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
+      };
+      const token = jwt.sign(
+        { id: demoUser.id, username: demoUser.username, role: demoUser.role },
+        JWT_SECRET,
+        { expiresIn: '1d' }
+      );
+      return res.json({ token, user: demoUser });
+    }
+
     // Find user by username
     const [user] = await db.select().from(users).where(eq(users.username, username));
 
@@ -45,27 +61,9 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    if (process.env.DEMO_AUTH === 'true') {
-      const demos: Record<string, { id: string; username: string; role: string; name: string; password: string; avatar?: string }> = {
-        admin: { id: '1', username: 'admin', role: 'admin', name: 'Anand (Admin)', password: 'admin123' },
-        jurgern: { id: '2', username: 'jurgern', role: 'employee', name: 'Jurgern', password: 'agent123' },
-      };
-      const demo = demos[req.body.username];
-      if (demo && req.body.password === demo.password) {
-        const token = jwt.sign(
-          { id: demo.id, username: demo.username, role: demo.role },
-          JWT_SECRET,
-          { expiresIn: '1d' }
-        );
-        const { password: _pwd, ...userData } = demo;
-        return res.json({ token, user: userData });
-      }
-    }
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 export default router;
-
-

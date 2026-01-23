@@ -8,7 +8,6 @@ import authRoutes from './routes/auth';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { serveStatic } from './static';
 
 // Load environment variables
 dotenv.config();
@@ -22,7 +21,7 @@ app.use(cookieParser());
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || true,
+  origin: 'http://localhost:5000', // Your frontend URL
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -31,9 +30,6 @@ app.use(cors({
 // Routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/auth', authRoutes);
-
-// Serve built client in production
-serveStatic(app);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -51,7 +47,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // Start the server
 const PORT = parseInt(process.env.PORT || '5001', 10);
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
-  console.log(`API Documentation: http://0.0.0.0:${PORT}/api-docs`);
+httpServer.listen(PORT, '127.0.0.1', () => {
+  console.log(`Server is running on http://127.0.0.1:${PORT}`);
+  console.log(`API Documentation: http://127.0.0.1:${PORT}/api-docs`);
 });
