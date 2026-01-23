@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import { serveStatic } from './static';
 
 // Load environment variables
 dotenv.config();
@@ -31,6 +32,10 @@ app.use(cors({
 app.use('/api/tasks', taskRoutes);
 app.use('/api/auth', authRoutes);
 
+if (process.env.NODE_ENV === 'production') {
+  serveStatic(app);
+}
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -47,7 +52,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // Start the server
 const PORT = parseInt(process.env.PORT || '5001', 10);
-httpServer.listen(PORT, '127.0.0.1', () => {
-  console.log(`Server is running on http://127.0.0.1:${PORT}`);
-  console.log(`API Documentation: http://127.0.0.1:${PORT}/api-docs`);
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`API Documentation: http://0.0.0.0:${PORT}/api-docs`);
 });
