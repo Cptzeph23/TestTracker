@@ -29,8 +29,14 @@ export function CalendarView() {
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
   const handleDayClick = (day: Date) => {
-    setSelectedDate(day);
-    setIsTaskModalOpen(true);
+    const dayTasks = getTasksForDay(day);
+    if (dayTasks.length > 0) {
+      setSelectedTask(dayTasks[0]);
+      setIsDetailsModalOpen(true);
+    } else {
+      setSelectedDate(day);
+      setIsTaskModalOpen(true);
+    }
   };
 
   const handleTaskClick = (e: React.MouseEvent, task: Task) => {
