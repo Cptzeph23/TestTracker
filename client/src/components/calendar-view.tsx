@@ -47,7 +47,8 @@ export function CalendarView() {
 
   const getTasksForDay = (day: Date) => {
     if (!tasks || !Array.isArray(tasks)) return [];
-    return tasks.filter(task => task?.date && isSameDay(new Date(task.date), day));
+    const dayKey = format(day, 'yyyy-MM-dd');
+    return tasks.filter(task => task?.date && task.date === dayKey);
   };
 
   const getAssignee = (id: string) => users.find(u => u.id === id);

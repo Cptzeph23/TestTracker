@@ -76,7 +76,7 @@ export function TaskDetailsModal({ task, open, onOpenChange }: TaskDetailsModalP
               <Calendar className="w-3 h-3" /> Due Date
             </span>
             <span className="text-sm font-medium text-zinc-200">
-              {format(new Date(task.date), "MMM d, yyyy")}
+              {format(new Date(`${task.date}T00:00:00`), "MMM d, yyyy")}
             </span>
           </div>
           <div className="p-4 bg-zinc-900/50 flex flex-col gap-1">

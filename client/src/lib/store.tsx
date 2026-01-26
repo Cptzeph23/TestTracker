@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { api } from './api';
 import { Task as BaseTask, TaskStatus } from '../../../shared/schema';
@@ -252,7 +253,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const formattedTasks = tasks.map((task: any) => ({
           ...task,
           id: task.id,
-          date: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
+          date: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '',
           assigneeId: task.assignedTo,
           creatorId: task.createdBy,
           status: task.status.toLowerCase().replace('_', '-') as Task['status'],
@@ -363,7 +364,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const formattedTask = {
       ...newTask,
       id: newTask.id,
-      date: newTask.dueDate ? new Date(newTask.dueDate).toISOString().split('T')[0] : '',
+      date: newTask.dueDate ? format(new Date(newTask.dueDate), 'yyyy-MM-dd') : '',
       assigneeId: newTask.assignedTo,
       creatorId: newTask.createdBy,
       status: (newTask.status || 'PENDING').toLowerCase().replace('_', '-') as Task['status'],
