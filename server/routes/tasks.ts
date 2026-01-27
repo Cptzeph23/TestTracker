@@ -75,13 +75,16 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(201).json(demoTask);
     }
     
+    const assigned =
+      typeof taskFields.assignedTo === 'string' && /^[0-9a-fA-F-]{36}$/.test(taskFields.assignedTo)
+        ? taskFields.assignedTo
+        : null;
+
     const taskData: InsertTask = {
       ...taskFields,
-      // normalize status to uppercase underscore enum
       status: (taskFields.status || TaskStatus.PENDING) as TaskStatus,
-      // convert dueDate strings to Date objects if provided
-      // drizzle expects Date for timestamp columns
       ...(taskFields.dueDate ? { dueDate: new Date(taskFields.dueDate) } : {}),
+      ...(assigned ? { assignedTo: assigned } : {}),
       createdBy: req.user.id,
     };
     

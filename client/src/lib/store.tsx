@@ -327,8 +327,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       title: task.title,
       description: task.description || '',
       status: task.status.toUpperCase().replace('-', '_') as TaskStatus,
-      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
-      assignedTo: task.assignedTo,
+      dueDate: (task as any).date ? new Date((task as any).date).toISOString() : null,
+      assignedTo: (task as any).assigneeId || null,
       createdBy: currentUser.id, // Ensure createdBy is set from the current user
       // Include additional fields if they exist
       ...((task as any).policyNumber && { policyNumber: (task as any).policyNumber }),
@@ -376,10 +376,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
     
     // Create notification if assignee exists
-    if (task.assignedTo) {
+    if ((task as any).assigneeId) {
       const notification: Notification = {
         id: Math.random().toString(36).substr(2, 9),
-        userId: task.assignedTo,
+        userId: (task as any).assigneeId,
         message: `New task assigned: ${task.title}`,
         read: false,
         createdAt: new Date().toISOString(),
