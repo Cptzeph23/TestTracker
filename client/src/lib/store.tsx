@@ -157,7 +157,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem("simia_tasks");
-    return saved ? JSON.parse(saved) : MOCK_TASKS;
+    const base: any[] = saved ? JSON.parse(saved) : (MOCK_TASKS as any[]);
+    // Normalize to calendar-friendly shape
+    return base.map((t: any) => ({
+      ...t,
+      date: t.date ?? (t.dueDate ? format(new Date(t.dueDate), 'yyyy-MM-dd') : ''),
+      assigneeId: t.assigneeId ?? t.assignedTo ?? null,
+      creatorId: t.creatorId ?? t.createdBy ?? null,
+      status: (t.status ?? 'PENDING').toString().toLowerCase().replace('_', '-') as any,
+    }));
   });
 
   const [notifications, setNotifications] = useState<Notification[]>(() => {
@@ -250,15 +258,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       try {
         const tasks = await api.getTasks();
         // Transform tasks to match the frontend format
-        const formattedTasks = tasks.map((task: any) => ({
+        const formattedTasks = Array.isArray(tasks) ? tasks.map((task: any) => ({
           ...task,
           id: task.id,
           date: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '',
           assigneeId: task.assignedTo,
           creatorId: task.createdBy,
           status: task.status.toLowerCase().replace('_', '-') as Task['status'],
-        }));
-        setTasks(formattedTasks);
+        })) : [];
+        // In demo/dev mode, the API may return an empty list.
+        // Avoid wiping out existing local tasks if the response is empty.
+        if (formattedTasks.length > 0) {
+          setTasks(formattedTasks);
+        }
       } catch (error) {
         console.error('Failed to load tasks', error);
         toast({

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, CheckCircle2, Circle, Clock, Calendar 
 import { Button } from "@/components/ui/button";
 import { TaskModal } from "@/components/task-modal";
 import { TaskDetailsModal } from "@/components/task-details-modal";
+import { DayTasksModal } from "@/components/day-tasks-modal";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,6 +16,7 @@ export function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDayModalOpen, setIsDayModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -30,13 +32,12 @@ export function CalendarView() {
 
   const handleDayClick = (day: Date) => {
     const dayTasks = getTasksForDay(day);
+    setSelectedDate(day);
     if (dayTasks.length > 0) {
-      setSelectedTask(dayTasks[0]);
-      setIsDetailsModalOpen(true);
-    } else {
-      setSelectedDate(day);
-      setIsTaskModalOpen(true);
+      setIsDayModalOpen(true);
+      return;
     }
+    setIsTaskModalOpen(true);
   };
 
   const handleTaskClick = (e: React.MouseEvent, task: Task) => {
@@ -132,11 +133,19 @@ export function CalendarView() {
                   </span>
                   
                   {/* Add Button (Hover) */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-1 group-hover:translate-y-0">
-                     <div className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                       <Plus className="w-3 h-3" />
-                     </div>
-                  </div>
+                  <button
+                    aria-label="Add task"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedDate(day);
+                      setIsTaskModalOpen(true);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-1 group-hover:translate-y-0"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-200 dark:hover:bg-amber-900/50">
+                      <Plus className="w-3 h-3" />
+                    </div>
+                  </button>
                 </div>
 
                 {/* Tasks List */}
@@ -207,6 +216,22 @@ export function CalendarView() {
         task={selectedTask}
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
+      />
+
+      <DayTasksModal
+        date={selectedDate}
+        open={isDayModalOpen}
+        onOpenChange={setIsDayModalOpen}
+        onAddTask={(d) => {
+          setSelectedDate(d);
+          setIsDayModalOpen(false);
+          setIsTaskModalOpen(true);
+        }}
+        onSelectTask={(task) => {
+          setSelectedTask(task);
+          setIsDayModalOpen(false);
+          setIsDetailsModalOpen(true);
+        }}
       />
     </div>
   );
