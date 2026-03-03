@@ -1,4 +1,10 @@
 // client/src/lib/api.ts
+import { Task as BaseTask, TaskStatus } from '../../../shared/schema';
+
+type Task = BaseTask & {
+  policyNumber?: string;
+};
+
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api';
 
@@ -8,7 +14,13 @@ type ApiResponse<T = any> = {
   message?: string;
 };
 
-// Helper function to create headers with auth token
+const getAuthHeader = () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+  return {};
+};
 const createHeaders = (): HeadersInit => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -78,5 +90,34 @@ export const api = {
       body: JSON.stringify(task)
     });
     return handleResponse(response);
-  }
+  },
+
+  updateTask: async (taskId: string, taskData: Partial<Task>) => {
+    const res = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(taskData),
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to update task');
+    }
+    return res.json();
+  },
+
+  getMe: async () => {
+    const res = await fetch(`${API_BASE_URL}/users/me`, {
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to fetch user');
+    }
+    return res.json();
+  },
 };

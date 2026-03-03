@@ -183,10 +183,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("simia_users", JSON.stringify(users));
   }, [users]);
 
-  // Save notifications to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("simia_notifications", JSON.stringify(notifications));
-  }, [notifications]);
+    const fetchUser = async () => {
+      try {
+        const user = await api.getMe();
+        setUser(user);
+      } catch (error) {
+        console.error('Failed to fetch user', error);
+      }
+    };
+
+    if (api.isAuthenticated()) {
+      fetchUser();
+    }
+  }, []);
 
   const login = async (username: string, password: string) => {
     try {
@@ -194,50 +204,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       
       console.log('Login response data:', data);
 
-      if (data && (data as any).user) {
-          const userData = {
-            id: (data as any).user.id,
-            username: (data as any).user.username,
-            name: (data as any).user.name || username,
-            role: (data as any).user.role || 'employee',
-            avatar: (data as any).user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
-          };
-          
-          console.log('User data to store:', userData);
-          
-          // The server sends token directly in the response
-          const authToken = (data as any).token;
-          console.log('Auth token found:', authToken ? 'Yes' : 'No');
-          
-          if (authToken) {
-            console.log('Saving token using api.setAuthToken');
-            api.setAuthToken(authToken);
-          } else {
-            console.warn('No authentication token found in login response');
-            console.log('Full response data:', data);
-          }
-          
-          // Update the users list if this is a new user
-          setUsers(prevUsers => {
-            const existingUser = prevUsers.find(u => u.id === userData.id);
-            if (!existingUser) {
-              return [...prevUsers, userData];
-            }
-            return prevUsers;
-          });
-          
-          // Set the current user and save to localStorage
-          setUser(userData);
-          localStorage.setItem('simia_user', JSON.stringify(userData));
-          
-          // Verify token was saved
-          const savedToken = localStorage.getItem('token');
-          console.log('Token saved to localStorage:', savedToken ? 'Yes' : 'No');
-          
-          toast({
-            title: "Login Successful",
-            description: `Welcome back, ${userData.name}!`,
-          });
+      if (data && data.user) {
+        setUser(data.user);
+        api.setAuthToken(data.token);
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${data.user.name}!`,
+        });
       } else {
         throw new Error('User data not found in response');
       }
@@ -288,6 +261,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    api.clearAuthToken();
     toast({
       title: "Logged out",
       description: "See you next time!",
@@ -415,31 +389,41 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }
 };
 
-  const updateTaskStatus = (taskId: string, status: Task["status"]) => {
-    setTasks(prev => {
-      if (!Array.isArray(prev)) return [];
-      
-      const updatedTasks = prev.map(task => {
-        if (task.id === taskId) {
-          // If the status is changing, create a notification
-          if (task.status !== status && user && task.assignedTo && task.assignedTo !== user.id) {
-            const notification: Notification = {
-              id: Math.random().toString(36).substr(2, 9),
-              userId: task.assignedTo,
-              message: `Task status updated to ${status}: ${task.title}`,
-              read: false,
-              createdAt: new Date().toISOString(),
-              type: "status" as const
-            };
-            setNotifications(prevNotifications => [notification, ...prevNotifications]);
+  const updateTaskStatus = async (taskId: string, status: Task["status"]) => {
+    try {
+      const updatedTask = await api.updateTask(taskId, { status: status.toUpperCase().replace('-', '_') as TaskStatus });
+      setTasks(prev => {
+        if (!Array.isArray(prev)) return [];
+        
+        const updatedTasks = prev.map(task => {
+          if (task.id === taskId) {
+            // If the status is changing, create a notification
+            if (task.status !== status && user && task.assignedTo && task.assignedTo !== user.id) {
+              const notification: Notification = {
+                id: Math.random().toString(36).substr(2, 9),
+                userId: task.assignedTo,
+                message: `Task status updated to ${status}: ${task.title}`,
+                read: false,
+                createdAt: new Date().toISOString(),
+                type: "status" as const
+              };
+              setNotifications(prevNotifications => [notification, ...prevNotifications]);
+            }
+            return { ...task, status };
           }
-          return { ...task, status };
-        }
-        return task;
+          return task;
+        });
+        
+        return updatedTasks;
       });
-      
-      return updatedTasks;
-    });
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update task status. Please try again.",
+      });
+    }
   };
 
   const markNotificationAsRead = (id: string) => {

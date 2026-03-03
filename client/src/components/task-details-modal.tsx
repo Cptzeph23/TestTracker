@@ -60,9 +60,9 @@ export function TaskDetailsModal({ task, open, onOpenChange }: TaskDetailsModalP
                     <SelectValue placeholder="Update Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todo">Pending Review</SelectItem>
-                    <SelectItem value="in-progress">Processing</SelectItem>
-                    <SelectItem value="done">Completed</SelectItem>
+                    <SelectItem value="PENDING">Pending Review</SelectItem>
+                    <SelectItem value="IN_PROGRESS">Processing</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

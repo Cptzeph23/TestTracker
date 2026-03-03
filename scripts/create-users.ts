@@ -25,6 +25,16 @@ async function createUsers() {
       name: 'Normal User',
     });
 
+    // Create test user
+    const testUserSalt = await bcrypt.genSalt(10);
+    const testUserPassword = await bcrypt.hash('testpassword', testUserSalt);
+    await db.insert(users).values({
+      username: 'testuser',
+      password: testUserPassword,
+      role: Role.EMPLOYEE,
+      name: 'Test User',
+    });
+
     console.log('Successfully created admin and user');
   } catch (error) {
     console.error('Error creating users:', error);
