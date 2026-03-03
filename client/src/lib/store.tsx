@@ -205,8 +205,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.log('Login response data:', data);
 
       if (data && data.user) {
-        setUser(data.user);
         api.setAuthToken(data.token);
+        try {
+          const me = await api.getMe();
+          setUser(me);
+          localStorage.setItem("simia_user", JSON.stringify(me));
+        } catch {
+          setUser(data.user);
+          localStorage.setItem("simia_user", JSON.stringify(data.user));
+        }
         toast({
           title: "Login Successful",
           description: `Welcome back, ${data.user.name}!`,
@@ -246,11 +253,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('Failed to load tasks', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load tasks. Using local data instead.",
-        });
+        if (!Array.isArray(tasks) || tasks.length === 0) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load tasks. Using local data instead.",
+          });
+        }
       }
     };
 
@@ -262,6 +271,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     api.clearAuthToken();
+    localStorage.removeItem("simia_user");
     toast({
       title: "Logged out",
       description: "See you next time!",
@@ -306,6 +316,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         description: "Please log in to create tasks",
       });
       throw new Error('Not authenticated');
+    }
+    if (currentUser.role !== 'admin') {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "Only admins can create tasks",
+      });
+      throw new Error('Not authorized');
     }
 
     // Convert the task to match the backend schema
@@ -391,6 +409,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateTaskStatus = async (taskId: string, status: Task["status"]) => {
     try {
+      if (!user || user.role !== 'admin') {
+        toast({
+          variant: "destructive",
+          title: "Permission Denied",
+          description: "Only admins can update task status",
+        });
+        return;
+      }
+      const isUuid = /^[0-9a-fA-F-]{36}$/.test(taskId);
+      if (!isUuid) {
+        setTasks(prev => {
+          if (!Array.isArray(prev)) return [];
+          return prev.map(task => task.id === taskId ? { ...task, status } : task);
+        });
+        toast({
+          title: "Task Updated",
+          description: "Status updated",
+        });
+        return;
+      }
       const updatedTask = await api.updateTask(taskId, { status: status.toUpperCase().replace('-', '_') as TaskStatus });
       setTasks(prev => {
         if (!Array.isArray(prev)) return [];

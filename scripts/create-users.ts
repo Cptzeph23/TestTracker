@@ -43,4 +43,26 @@ async function createUsers() {
   }
 }
 
-createUsers();
+// createUsers();
+
+// Create an additional employee user if needed
+async function createAdditionalUser() {
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash('user2password', salt);
+    await db.insert(users).values({
+      username: 'user2',
+      password,
+      role: Role.EMPLOYEE,
+      name: 'User Two',
+    });
+    console.log('Successfully created user2 (employee)');
+  } catch (error) {
+    console.error('Error creating user2:', error);
+  } finally {
+    process.exit();
+  }
+}
+
+// Only create the additional user
+createAdditionalUser();

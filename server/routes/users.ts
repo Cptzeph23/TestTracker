@@ -50,6 +50,9 @@ router.get('/', authenticateToken, async (req, res) => {
 // Create a new user (admin only)
 router.post('/', authenticateToken, async (req, res) => {
   try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can create users' });
+    }
     const { username, password, role = Role.EMPLOYEE, name, avatar } = req.body;
     
     // Hash the password

@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import { db } from './db';
 import taskRoutes from './routes/tasks';
 import authRoutes from './routes/auth';
+import usersRoutes from './routes/users';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -31,6 +32,7 @@ app.use(cors({
 // Routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   serveStatic(app);

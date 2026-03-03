@@ -84,7 +84,7 @@ export function CalendarView() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          {user.role === 'admin' && (
+          {user?.role === 'admin' && (
             <Button 
               onClick={() => { setSelectedDate(new Date()); setIsTaskModalOpen(true); }} 
               className="gap-2 shadow-lg shadow-amber-500/20 bg-amber-500 text-black hover:bg-amber-400 font-semibold px-6 h-11"
@@ -135,7 +135,7 @@ export function CalendarView() {
                   </span>
                   
                   {/* Add Button (Hover) */}
-                  {user.role === 'admin' && (
+                  {user?.role === 'admin' && (
                     <button
                       aria-label="Add task"
                       onClick={(e) => {

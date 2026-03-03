@@ -54,6 +54,9 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // Create a new task
 router.post('/', authenticateToken, async (req, res) => {
   // Only admins can create tasks
+  if (!req.user) {
+    return res.status(401).json({ error: 'No user context' });
+  }
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Only admins can create tasks' });
   }
@@ -109,10 +112,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData: UpdateTask = req.body;
-    
-    const whereCondition = req.user.role === 'admin'
-      ? eq(tasks.id, id)
-      : and(eq(tasks.id, id), eq(tasks.createdBy, req.user.id));
+    if (!req.user) {
+      return res.status(401).json({ error: 'No user context' });
+    }
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can update tasks' });
+    }
 
     const [task] = await db
       .update(tasks)
@@ -120,7 +125,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
         ...updateData,
         updatedAt: new Date(),
       })
-      .where(whereCondition)
+      .where(eq(tasks.id, id))
       .returning();
     
     if (!task) {
@@ -141,14 +146,16 @@ router.put('/:id', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const whereCondition = req.user.role === 'admin'
-      ? eq(tasks.id, id)
-      : and(eq(tasks.id, id), eq(tasks.createdBy, req.user.id));
+    if (!req.user) {
+      return res.status(401).json({ error: 'No user context' });
+    }
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can delete tasks' });
+    }
 
     const [deletedTask] = await db
       .delete(tasks)
-      .where(whereCondition)
+      .where(eq(tasks.id, id))
       .returning();
     
     if (!deletedTask) {

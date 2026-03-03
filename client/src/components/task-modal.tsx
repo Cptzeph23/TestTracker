@@ -27,7 +27,7 @@ interface TaskModalProps {
 }
 
 export function TaskModal({ open, onOpenChange, defaultDate }: TaskModalProps) {
-  const { users, addTask } = useStore();
+  const { users, addTask, user } = useStore();
   
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
@@ -194,9 +194,11 @@ export function TaskModal({ open, onOpenChange, defaultDate }: TaskModalProps) {
               )}
             />
 
-            <DialogFooter>
-              <Button type="submit" size="lg" className="w-full bg-amber-500 text-black hover:bg-amber-400">Create Task</Button>
-            </DialogFooter>
+            {user?.role === 'admin' && (
+              <DialogFooter>
+                <Button type="submit" size="lg" className="w-full bg-amber-500 text-black hover:bg-amber-400">Create Task</Button>
+              </DialogFooter>
+            )}
           </form>
         </Form>
       </DialogContent>

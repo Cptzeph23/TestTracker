@@ -16,7 +16,7 @@ interface DayTasksModalProps {
 }
 
 export function DayTasksModal({ date, open, onOpenChange, onAddTask, onSelectTask }: DayTasksModalProps) {
-  const { tasks, users } = useStore();
+  const { tasks, users, user } = useStore();
   if (!date) return null;
   const key = format(date, "yyyy-MM-dd");
   const dayTasks = Array.isArray(tasks) ? tasks.filter(t => t?.date === key) : [];
@@ -38,14 +38,16 @@ export function DayTasksModal({ date, open, onOpenChange, onAddTask, onSelectTas
             <div className="text-xs text-zinc-400">
               {dayTasks.length} task{dayTasks.length === 1 ? "" : "s"}
             </div>
-            <Button
-              size="sm"
-              onClick={() => onAddTask(date)}
-              className="gap-2 bg-amber-500 text-black hover:bg-amber-400"
-            >
-              <Plus className="w-4 h-4" />
-              Add Task
-            </Button>
+            {user?.role === 'admin' && (
+              <Button
+                size="sm"
+                onClick={() => onAddTask(date)}
+                className="gap-2 bg-amber-500 text-black hover:bg-amber-400"
+              >
+                <Plus className="w-4 h-4" />
+                Add Task
+              </Button>
+            )}
           </div>
         </div>
         <div className="p-6 pt-3 space-y-3 max-h-[60vh] overflow-y-auto">

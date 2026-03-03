@@ -82,7 +82,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-zinc-200">{user?.name}</p>
-              <p className="text-xs text-amber-500 capitalize font-medium">{user?.role}</p>
+              <p className="text-xs text-amber-500 font-medium">
+                {user?.role === 'admin' ? 'Admin' : 'Employee'}
+              </p>
             </div>
             
             <Popover>
