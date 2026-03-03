@@ -53,7 +53,7 @@ export function TaskDetailsModal({ task, open, onOpenChange }: TaskDetailsModalP
               </div>
             </div>
             
-            {currentUser?.id === task.assigneeId && (
+            {currentUser?.role === 'admin' && (
               <div className="w-[180px]">
                 <Select defaultValue={task.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="bg-zinc-900 border-zinc-800">

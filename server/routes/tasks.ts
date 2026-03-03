@@ -53,6 +53,11 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // Create a new task
 router.post('/', authenticateToken, async (req, res) => {
+  // Only admins can create tasks
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Only admins can create tasks' });
+  }
+
   try {
     // Extract amount if present to prevent DB error as column doesn't exist
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -105,19 +110,17 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const updateData: UpdateTask = req.body;
     
-    // Only the creator can update the task
+    const whereCondition = req.user.role === 'admin'
+      ? eq(tasks.id, id)
+      : and(eq(tasks.id, id), eq(tasks.createdBy, req.user.id));
+
     const [task] = await db
       .update(tasks)
       .set({
         ...updateData,
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(tasks.id, id),
-          eq(tasks.createdBy, req.user.id)
-        )
-      )
+      .where(whereCondition)
       .returning();
     
     if (!task) {
@@ -139,15 +142,13 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Only the creator can delete the task
+    const whereCondition = req.user.role === 'admin'
+      ? eq(tasks.id, id)
+      : and(eq(tasks.id, id), eq(tasks.createdBy, req.user.id));
+
     const [deletedTask] = await db
       .delete(tasks)
-      .where(
-        and(
-          eq(tasks.id, id),
-          eq(tasks.createdBy, req.user.id)
-        )
-      )
+      .where(whereCondition)
       .returning();
     
     if (!deletedTask) {

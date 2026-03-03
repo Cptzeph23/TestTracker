@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Badge } from "@/components/ui/badge";
 
 export function CalendarView() {
-  const { tasks, users } = useStore();
+  const { tasks, users, user } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -84,13 +84,15 @@ export function CalendarView() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          <Button 
-            onClick={() => { setSelectedDate(new Date()); setIsTaskModalOpen(true); }} 
-            className="gap-2 shadow-lg shadow-amber-500/20 bg-amber-500 text-black hover:bg-amber-400 font-semibold px-6 h-11"
-          >
-            <Plus className="w-4 h-4" />
-            Create Task
-          </Button>
+          {user.role === 'admin' && (
+            <Button 
+              onClick={() => { setSelectedDate(new Date()); setIsTaskModalOpen(true); }} 
+              className="gap-2 shadow-lg shadow-amber-500/20 bg-amber-500 text-black hover:bg-amber-400 font-semibold px-6 h-11"
+            >
+              <Plus className="w-4 h-4" />
+              Create Task
+            </Button>
+          )}
         </div>
       </div>
 
@@ -133,19 +135,21 @@ export function CalendarView() {
                   </span>
                   
                   {/* Add Button (Hover) */}
-                  <button
-                    aria-label="Add task"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDate(day);
-                      setIsTaskModalOpen(true);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-1 group-hover:translate-y-0"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-200 dark:hover:bg-amber-900/50">
-                      <Plus className="w-3 h-3" />
-                    </div>
-                  </button>
+                  {user.role === 'admin' && (
+                    <button
+                      aria-label="Add task"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDate(day);
+                        setIsTaskModalOpen(true);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-1 group-hover:translate-y-0"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-200 dark:hover:bg-amber-900/50">
+                        <Plus className="w-3 h-3" />
+                      </div>
+                    </button>
+                  )}
                 </div>
 
                 {/* Tasks List */}
